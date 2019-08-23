@@ -1,0 +1,52 @@
+<ion-header>
+  <ion-toolbar color="danger">
+    <ion-title>My Hero Search</ion-title>
+  </ion-toolbar>
+</ion-header>
+ 
+<ion-content>
+ 
+  <ion-searchbar [(ngModel)]="searchTerm" (ionChange)="searchChanged($event)"></ion-searchbar>
+ 
+  <ion-item>
+    <ion-label>Select Searchtype</ion-label>
+    <ion-select [(ngModel)]="type" (ionChange)="searchChanged($event)">
+      <ion-select-option value="characters">Characters</ion-select-option>
+      <ion-select-option value="comics">Comics</ion-select-option>
+    </ion-select>
+  </ion-item>
+  
+  <ion-list *ngIf="type === 'characters'">
+ 
+    <ion-item button *ngFor="let hero of (response | async)" [routerLink]="['/', 'characters', hero.id]">
+      <ion-avatar slot="start">
+        <img [src]="hero.thumbnail.path + '.' + hero.thumbnail.extension" *ngIf="hero.thumbnail.path != 'N/A'">
+      </ion-avatar>
+ 
+      <ion-label text-wrap>
+        <h3>{{ hero.name }}</h3>
+        {{ hero.comics.available }} available comics
+      </ion-label>
+ 
+    </ion-item>
+ 
+  </ion-list>
+
+  <ion-list *ngIf="type === 'comics'">
+ 
+    <ion-item button *ngFor="let comic of (response | async)" [routerLink]="['/', 'comics', comic.id]">
+      <ion-avatar slot="start">
+        <img [src]="comic.thumbnail.path + '.' + comic.thumbnail.extension" *ngIf="comic.thumbnail.path != 'N/A'">
+      </ion-avatar>
+ 
+      <ion-label text-wrap>
+        <h3>{{ comic.title }}</h3>
+        {{ comic.format }} - ${{ comic.prices[0].price }} 
+      </ion-label>
+ 
+    </ion-item>
+ 
+  </ion-list>
+
+
+</ion-content>
