@@ -15,10 +15,28 @@
       <ion-select-option value="comics">Comics</ion-select-option>
     </ion-select>
   </ion-item>
-  
+
+  <ion-grid color="" *ngIf="this.heroService.attributionText">
+    <ion-row>
+
+      <ion-col size="3" align-self-start>
+        <ion-button (click)="previousResults()" id="searchLeft"  class="searchPageButtons ion-float-left" ><b>Previous</b></ion-button>
+      </ion-col>
+
+      <span size="6" align-self-center class="ion-text-center searchPageButtons" *ngIf="((total !== undefined) || (total !== null))">
+        Showing {{this.heroService.limit + this.heroService.offset}} of {{this.heroService.total}} results.
+      </span>
+
+      <ion-col size="3" align-self-end>
+        <ion-button (click)="nextResults()" size="3" id="searchRight" class="searchPageButtons ion-float-right"><b>Next</b></ion-button>
+      </ion-col>
+
+    </ion-row>
+  </ion-grid>
+
   <ion-list *ngIf="type === 'characters'">
  
-    <ion-item button *ngFor="let hero of (response | async)" [routerLink]="['/', 'characters', hero.id]">
+    <ion-item button *ngFor="let hero of (results | async)" [routerLink]="['/', 'characters', hero.id]">
       <ion-avatar slot="start">
         <img [src]="hero.thumbnail.path + '.' + hero.thumbnail.extension" *ngIf="hero.thumbnail.path != 'N/A'">
       </ion-avatar>
@@ -34,7 +52,7 @@
 
   <ion-list *ngIf="type === 'comics'">
  
-    <ion-item button *ngFor="let comic of (response | async)" [routerLink]="['/', 'comics', comic.id]">
+    <ion-item button *ngFor="let comic of (results | async)" [routerLink]="['/', 'comics', comic.id]">
       <ion-avatar slot="start">
         <img [src]="comic.thumbnail.path + '.' + comic.thumbnail.extension" *ngIf="comic.thumbnail.path != 'N/A'">
       </ion-avatar>
@@ -48,5 +66,10 @@
  
   </ion-list>
 
+  <ion-footer *ngIf="this.heroService.attributionText">
+    <ion-toolbar>
+      <ion-title>{{this.heroService.attributionText}}</ion-title>
+    </ion-toolbar>
+  </ion-footer>
 
 </ion-content>
