@@ -24,7 +24,8 @@
       </ion-col>
 
       <span size="6" align-self-center class="ion-text-center searchPageButtons" *ngIf="((total !== undefined) || (total !== null))">
-        Showing {{this.heroService.limit + this.heroService.offset}} of {{this.heroService.total}} results.
+        <!-- Showing the first {{this.heroService.limit + this.heroService.offset}} of {{this.heroService.total}} results.  -->
+        Page {{this.currentPage}} of {{this.pageCount}}
       </span>
 
       <ion-col size="3" align-self-end>
@@ -36,7 +37,7 @@
 
   <ion-list *ngIf="type === 'characters'">
  
-    <ion-item button *ngFor="let hero of (results | async)" [routerLink]="['/', 'characters', hero.id]">
+    <ion-item button *ngFor="let hero of resultsToShow" [routerLink]="['/', 'characters', hero.id]">
       <ion-avatar slot="start">
         <img [src]="hero.thumbnail.path + '.' + hero.thumbnail.extension" *ngIf="hero.thumbnail.path != 'N/A'">
       </ion-avatar>
@@ -52,7 +53,7 @@
 
   <ion-list *ngIf="type === 'comics'">
  
-    <ion-item button *ngFor="let comic of (results | async)" [routerLink]="['/', 'comics', comic.id]">
+    <ion-item button *ngFor="let comic of resultsToShow" [routerLink]="['/', 'comics', comic.id]">
       <ion-avatar slot="start">
         <img [src]="comic.thumbnail.path + '.' + comic.thumbnail.extension" *ngIf="comic.thumbnail.path != 'N/A'">
       </ion-avatar>

@@ -86,7 +86,8 @@ export class HeroService {
 
           // create an Observable from the Array of Objects in response.data.results
           const stuff = response[`data`][`results`]; // since response isn't declared: we need to pass the key names in Array-like fashion
-          if (stuff.length > 0) {
+
+          if ((stuff.length > 0) && (typeof(stuff) === typeof([]))) {
             this.results = from(stuff);
           } else {
             this.results = from([]);
@@ -113,10 +114,6 @@ export class HeroService {
       .pipe(
         map(response => response[`data`][`results`][0])  // catch the first object from the array - we match an ID !
       );
-  }
-
-  saveResults(res: any) { // of what data type?
-
   }
 
 }
