@@ -31,6 +31,6 @@ export class CharacterDetailsPage implements OnInit {
   }
 
   openWebsite() {
-    // window.open(this.information.Website, '_blank');
+    window.open(this.information.urls[0][`url`], '_blank');
   }
 }

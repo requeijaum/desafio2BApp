@@ -38,6 +38,8 @@
 
   <ion-list *ngIf="type === 'characters'">
  
+    <!-- span *ngIf="this.results = [] || this.results = undefined">No characters were found.</span -->
+
     <ion-item button *ngFor="let hero of resultsToShow" [routerLink]="['/', 'characters', hero.id]">
       <ion-avatar slot="start">
         <img [src]="hero.thumbnail.path + '.' + hero.thumbnail.extension" *ngIf="hero.thumbnail.path != 'N/A'">
@@ -54,6 +56,8 @@
 
   <ion-list *ngIf="type === 'comics'">
  
+    <!-- span *ngIf="results = [] || results = undefined">No comics were found.</span -->
+
     <ion-item button *ngFor="let comic of resultsToShow" [routerLink]="['/', 'comics', comic.id]">
       <ion-avatar slot="start">
         <img [src]="comic.thumbnail.path + '.' + comic.thumbnail.extension" *ngIf="comic.thumbnail.path != 'N/A'">

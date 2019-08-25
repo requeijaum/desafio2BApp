@@ -8,7 +8,7 @@ import { Md5 } from 'ts-md5/dist/md5';
 export enum SearchType {
   comics      = 'comics',
   characters  = 'characters',
-  cwac        = 'cwac'
+  cwac        = 'characters'    // we need to get the unique character
 }
 
 export enum QueryType {
@@ -19,7 +19,8 @@ export enum QueryType {
 
 export enum QuickDescriptionType {
   comics      = 'title',
-  characters  = 'name'
+  characters  = 'name',
+  cwac        = 'title'         // because still comics
 }
 
 @Injectable({
@@ -65,25 +66,30 @@ export class HeroService {
 
   searchData(title: string, type: SearchType): Observable<any> {
 
-    console.log('searchData: title = ' + title);
-
-    if (title.length <= 0) {
-      console.log(`Busca vazia para ${type}`);
+    if ((title.length <= 0) || (title === undefined)) {
+      console.log('heroService.searchData: Empty search for: ' + type);
       return ; // nothing ? not even an empty Array?
 
     } else {
 
-      let url = `${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
-      `&limit=${this.limit}&offset=${this.offset}` +
-      `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
+      console.log('heroService.searchData: title = ' + title);
+      let url = '';
 
       // we need to get comics with a character
       // the "comics" endpoint offer the following:
       // data.results[index].characters (CharacterList, optional): A resource list containing the characters which appear in this comic.
       // fire up a comics SearchType but get something when this.results.length = 1;
 
-      if (type === 'cwac') { // or cwac ? the SearchType or the string ?
-        url = `${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
+      // const cwac = QueryType[2];       // can't access in a intelligent way... put the absolute position in the enum (third element)
+                                          // got "undefined"... crap.
+
+      // console.log('heroService: The great cwac test: QueryType[2] = ' + cwac);
+
+      console.log('heroService: The great type test: type = ' + type);
+      /*
+      if (type === SearchType.cwac) {   // or cwac ? the SearchType or the string ?
+
+        url = `${this.url}${SearchType[type]}?${QueryType[type]}=${encodeURI(title)}` +
         `&limit=${this.limit}&offset=${this.offset}` +
         `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
 
@@ -91,14 +97,23 @@ export class HeroService {
         // do a new request using the ID on:
         // http://gateway.marvel.com/v1/public/characters/${characterID}/comics?ts=&apiKey=&hash=
 
+      } else {
+        url = `${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
+        `&limit=${this.limit}&offset=${this.offset}` +
+        `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
       }
+      */
 
+      // I will use SearchType[type] now for specifyng the endpoint - since 'server/v1/public/cwac' doesn't exist :^)
+      url = `${this.url}${SearchType[type]}?${QueryType[type]}=${encodeURI(title)}` +
+      `&limit=${this.limit}&offset=${this.offset}` +
+      `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
 
       return this.http.get(url)
       .pipe(
         map(response => {
           // what to do with the received response?
-          console.log('searchData: Got an response!');
+          console.log('heroService.searchData: Got an response!');
           console.log(response);
 
           this.total = response[`data`][`total`];
@@ -140,7 +155,11 @@ export class HeroService {
      *
      * - For Character, you have:
      *
-     * >
+     * > name, description,
+     * > comics.items.available, comics.items.join(', '),
+     * > series.available, series.items.join(', '),
+     * > stories.available, stories.items[name , type].join(', '),
+     * > events.available, events.items.join(', ')
      *
      * - For Comics With a Character, you have:
      *
