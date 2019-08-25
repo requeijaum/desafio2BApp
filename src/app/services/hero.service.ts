@@ -7,7 +7,8 @@ import { Md5 } from 'ts-md5/dist/md5';
 // Typescript custom enum for search types (optional)
 export enum SearchType {
   comics      = 'comics',
-  characters  = 'characters'
+  characters  = 'characters',
+  cwac        = 'cwac'
 }
 
 export enum QueryType {
@@ -71,10 +72,22 @@ export class HeroService {
 
     } else {
 
-      return this.http.get(`${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
+      let url = `${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
+      `&limit=${this.limit}&offset=${this.offset}` +
+      `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
+
+      // we need to get comics with a character
+      // the "comics" endpoint offer the following:
+      // data.results[index].characters (CharacterList, optional): A resource list containing the characters which appear in this comic.
+      // fire up a comics SearchType but get something when this.results.length = 1;
+
+      if (type === 'cwac') { // or cwac ? the SearchType or the string ?
+        url = `${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
         `&limit=${this.limit}&offset=${this.offset}` +
-        `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`
-      )
+        `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
+      }
+
+      return this.http.get(url)
       .pipe(
         map(response => {
           // what to do with the received response?

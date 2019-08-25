@@ -11,24 +11,25 @@
   <ion-item>
     <ion-label>Select Searchtype</ion-label>
     <ion-select [(ngModel)]="type" (ionChange)="searchChanged($event)">
-      <ion-select-option value="characters">Characters</ion-select-option>
       <ion-select-option value="comics">Comics</ion-select-option>
+      <ion-select-option value="characters">Characters</ion-select-option>
+      <ion-select-option value="cwac">Comics with a character</ion-select-option>
     </ion-select>
   </ion-item>
 
   <ion-grid color="" *ngIf="this.heroService.attributionText">
     <ion-row>
 
-      <ion-col size="3" align-self-start>
+      <ion-col align-self-start>
         <ion-button (click)="previousResults()" id="searchLeft"  class="searchPageButtons ion-float-left" ><b>Previous</b></ion-button>
       </ion-col>
 
-      <span size="6" align-self-center class="ion-text-center searchPageButtons" *ngIf="((total !== undefined) || (total !== null))">
+      <span align-self-center class="ion-text-center searchPageButtons" *ngIf="((total !== undefined) || (total !== null))">
         <!-- Showing the first {{this.heroService.limit + this.heroService.offset}} of {{this.heroService.total}} results.  -->
         Page {{this.currentPage}} of {{this.pageCount}}
       </span>
 
-      <ion-col size="3" align-self-end>
+      <ion-col align-self-end>
         <ion-button (click)="nextResults()" size="3" id="searchRight" class="searchPageButtons ion-float-right"><b>Next</b></ion-button>
       </ion-col>
 
@@ -59,8 +60,9 @@
       </ion-avatar>
  
       <ion-label text-wrap>
-        <h3>{{ comic.title }}</h3>
-        {{ comic.format }} - ${{ comic.prices[0].price }} 
+        <h2>{{ comic.title }}</h2>
+        <h3>{{this.comicsAuthors}}</h3>
+        <p>{{ comic.format }} ${{ comic.prices[0].price }}</p>
       </ion-label>
  
     </ion-item>
