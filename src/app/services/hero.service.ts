@@ -13,7 +13,8 @@ export enum SearchType {
 
 export enum QueryType {
   comics      = 'titleStartsWith',
-  characters  = 'nameStartsWith'
+  characters  = 'nameStartsWith',
+  cwac        = 'name'
 }
 
 export enum QuickDescriptionType {
@@ -85,7 +86,13 @@ export class HeroService {
         url = `${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
         `&limit=${this.limit}&offset=${this.offset}` +
         `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
+
+        // we need the characterID after finding it.
+        // do a new request using the ID on:
+        // http://gateway.marvel.com/v1/public/characters/${characterID}/comics?ts=&apiKey=&hash=
+
       }
+
 
       return this.http.get(url)
       .pipe(
@@ -121,6 +128,38 @@ export class HeroService {
    */
 
    getDetails(id: any, type: string) {  // not using SearchType here!
+
+    /* - For Comic, you have:
+     *
+     * > creators (writer, penciler, cover artist),
+     * > characters, description, events, series, stories.
+     * > prices[0].price , urls[0].url
+     * > example  = https://www.marvel.com/comics/issue/71169/spider-mandeadpool_2016_50
+     * > endpoint = http://gateway.marvel.com/v1/public/comics/71169
+     * > ?ts=1566725920&apikey=2cd1ebaefe46822d59015b3091622ac5&hash=fe8c206cf850db9133d107a025f7baae
+     *
+     * - For Character, you have:
+     *
+     * >
+     *
+     * - For Comics With a Character, you have:
+     *
+     * > Check this 'comics' endpoint for a character:
+     * > http://gateway.marvel.com/v1/public/characters/1009157/comics
+     * > ?ts=1566523976808&apikey=2cd1ebaefe46822d59015b3091622ac5&hash=cd049b0831c044852564c71b3aec5ad8
+     *
+     * > or you can fetch a comic normally and specify a characterId
+     * > characters 		Return only comics which feature the specified characters (accepts a comma-separated list of ids).
+     *
+     * > find a character ID - after some suggestions - and fetch a list of comics with him in it (as seen above)
+     * > I saw it in: https://github.com/fiveisprime/marvel-api
+     * > use findByName - param 'name' in the URL
+     * > try it on "Spider-Man"
+     *
+     *
+     */
+
+
     return this.http.get(`
         ${this.url}${type}/${id}?ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}
       `)
