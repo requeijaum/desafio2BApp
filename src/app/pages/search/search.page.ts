@@ -37,12 +37,14 @@ export class SearchPage implements OnInit, OnDestroy {
       console.error('searchObserver got an error: ' + err);
 
       setTimeout(() => { // will this be enough for network errors?
-        this.loadingController.dismiss();
+        this.dismissLoading();
+
         this.presentAlert('Error', 'An error occurred while processing your request.');
       }, 5000);
 
       // clean previous results? nah.
       // set this.oldType to be equal as this.type?
+      this.resultsToShow = [] ; // we also clear from searchChanged()...
 
     },
     complete: () => {
@@ -54,7 +56,7 @@ export class SearchPage implements OnInit, OnDestroy {
       this.resultsSubscription = this.heroService.results.subscribe(this.resultsObserver); // bug here?
       console.log('searchObserver - got results... from this.heroService.results');
       delay(3000); // I don't think it's working
-      // this.loadingController.dismiss();
+      // dismissLoading();
 
       // something usable here
       this.oldType = this.type;
@@ -67,7 +69,7 @@ export class SearchPage implements OnInit, OnDestroy {
       console.log('resultsObserver got a next value:');
       console.log(x);
 
-      if (this.type === 'comics') {
+      if ((this.type === 'comics')) {
         // we need to process the response...
         // first: get all the writers on new property inside the received object "comic.creators.writers"
         // get all of them on x[`creators`][`items`] where that.role = "writer"
@@ -80,8 +82,45 @@ export class SearchPage implements OnInit, OnDestroy {
           }
 
         });
+
+        this.resultsToShow = this.resultsToShow.concat(x);
       }
-      this.resultsToShow = this.resultsToShow.concat(x);
+
+      if (this.type === 'characters') {
+        // simple as that
+        this.resultsToShow = this.resultsToShow.concat(x);
+      }
+
+      if (this.type === 'cwac') {
+        // get the comics key and concat it's objects inside the array
+        // this.resultsToShow = this.resultsToShow.concat(x[`comics`][`items`]);
+
+        // we need to process the response...
+        // first: get all the comicIDs after doing a REGEX
+        // on new property inside the received object "comics.items.resourceURI"
+        this.tempArray = [];
+
+        x[`comics`][`items`].forEach(element => {
+
+          if (/.public.comics./g.test(element[`resourceURI`])) { // test for valid URLs
+            const comicID = element[`resourceURI`].match(/(?:\d)(\d{1,})/g); // https://i.imgur.com/Sya5ahU.png
+            this.tempArray = this.tempArray.concat(comicID);
+            element[`injectedId`] = comicID;
+            // console.log('searchPage: cwac got comicID = ' + comicID);
+          } else {
+            console.log('searchPage: the REGEX for finding comicIDs in cwac failed!');
+          }
+
+        });
+
+        console.log('searchPage: the REGEX found this comicIDs = ');
+        console.log(this.tempArray); // we need to know how to add for our routerLinks
+        this.resultsToShow = this.resultsToShow.concat(x[`comics`][`items`]);
+
+        // if the routerLinks are failing... I can inject the ID's through Observable sorcery
+
+      }
+
     },
     error: err => {
       console.error('resultsObserver got an error: ' + err);
@@ -96,6 +135,12 @@ export class SearchPage implements OnInit, OnDestroy {
         this.comicsAuthors = this.tempArray.join(', ');
       }
 
+      if (this.type === 'cwac') {
+        // x[`creators`][`stringWriters`] = "Testing";
+        // this.comicIDs = this.tempArray.join(', ');
+        console.log('searchPage: look for the injected IDs!');
+      }
+
       // calculate the number stuff
       // this.pageStart = Math.floor(this.heroService.offset / this.heroService.offset);
       // this.pageEnd = Math.floor(this.resultsToShow.length / this.heroService.offset);
@@ -107,7 +152,7 @@ export class SearchPage implements OnInit, OnDestroy {
       // console.log(this.pages);
       console.log('currentPage: ' + this.currentPage + ', pageCount: ' + this.pageCount);
 
-      this.loadingController.dismiss();
+      this.dismissLoading();
 
     }
   };
@@ -115,6 +160,8 @@ export class SearchPage implements OnInit, OnDestroy {
   // pages: Array<any>;
   currentPage: number;
   pageCount: number;
+
+  loadingAppears: boolean;
 
   /**
    * Constructor of our first page
@@ -138,6 +185,8 @@ export class SearchPage implements OnInit, OnDestroy {
     this.pageCount = 0;
 
     console.log(this.getOldType());
+
+    this.search = new Observable<any>(); // since searchData now uses Promises...
 
   }
 
@@ -173,10 +222,13 @@ export class SearchPage implements OnInit, OnDestroy {
     const checkIfItsDone = () => {
       isItDoneYet
         .then(ok => {
+          console.log('searchPage: checkIfItsDone - got OK');
           console.log(ok);
-          this.searchEvent();
+          setTimeout( () => this.searchEvent() , 1000 ); // let's delay it a little because
+                                                         // heroService.dataObserver needs some time
         })
         .catch(err => {
+          console.log('searchPage: checkIfItsDone - the promise got an error');
           console.error(err);
         });
     };
@@ -195,22 +247,37 @@ export class SearchPage implements OnInit, OnDestroy {
     // this.search = this.heroService.searchData(this.searchTerm, this.type); // can we call this after some stuff?
     // this.results = this.heroService.results; // not here!
 
-    this.search = this.heroService.searchData(this.searchTerm, this.type);
+    this.search = this.heroService.searchData(this.searchTerm, this.type); // we may get an error for this
 
-    // I think I may change that
-    console.log('searchEvent: Outputting this.search:');
-    console.log(this.search);
+    // trigger something to show or hide in the search page?
+    this.loadingAppears = false; // we need presentLoadingWithOptions() to put "true" on this ONLY
 
     // Create observer object, outside this function.
-    this.searchSubscription = this.search.subscribe(this.searchObserver);
+    // this.searchSubscription = this.search.subscribe(this.searchObserver);
+    // but... can we pause our observable?
+    setTimeout(() => {
+      this.searchSubscription = this.search.subscribe(this.searchObserver);
+
+      // I think I may change that
+      console.log('searchEvent: Outputting this.search:');
+      console.log(this.search);
+
+    } , 3000);
+
+
     // this.resultsSubscription = this.results.subscribe(this.resultsObserver); // there is a bug here
 
     // now spin up the loader
     this.presentLoadingWithOptions();
 
+
   }
 
   async presentLoadingWithOptions() {
+
+    this.loadingAppears = true;
+
+    /*
     const loading = await this.loadingController.create({
       // spinner: null,
       // duration: 3000,
@@ -220,7 +287,13 @@ export class SearchPage implements OnInit, OnDestroy {
       backdropDismiss: true // may I change this?
       // cssClass: 'custom-class custom-loading'
     });
-    return await loading.present();
+    */
+    return await 0 ; // loading.present();
+  }
+
+  dismissLoading() {
+    // this.loadingController.dismiss();
+    this.loadingAppears = false;
   }
 
   async presentAlert(msg: string, sub: string) { // do I need to set it on some variables?
@@ -300,6 +373,7 @@ export class SearchPage implements OnInit, OnDestroy {
     this.oldType = this.type; // track previous searchType
     return await 'getOldType: got it!';
   }
+
 }
 
 

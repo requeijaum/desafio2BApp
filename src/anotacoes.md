@@ -125,9 +125,13 @@ For example, a user with a public key of "1234" and a private key of "abcd" coul
 ## to-do
 
 - preciso colocar uma imagem pra quando não existir thumbnail
+  > isso existe pra o caso de quadrinhos... hmmm...
 
-- falta listar quadrinhos a partir de um personagem
+- buscas com espaço ou símbolos geram URLs GETs estranhos
 
-- falta detalhes de personagem
+- disparar reinicio de offset da listagem de items de busca quando a searchQuery (title) mudar
+  > além do oldType !== type
 
-- falta detalhes de quadrinhos
+- injetar routerLink com characterIDs obtidos via REGEX em comic-details.html
+
+- injetar routerLink com comicIDs obtidos via REGEX em character-details.html

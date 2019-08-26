@@ -22,7 +22,7 @@ export class ComicDetailsPage implements OnInit {
   ngOnInit() {
     // Get the ID that was passed with the URL
     const id = this.activatedRoute.snapshot.paramMap.get('id'); // const or id ? tslint complains...
-    const type = 'characters' ; // hardcoded, heh - not SearchType
+    const type = 'comics' ; // hardcoded, heh - not SearchType
 
     // Get the information from the API
     this.heroService.getDetails(id, type).subscribe(results => {

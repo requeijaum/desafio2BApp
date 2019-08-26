@@ -22,10 +22,10 @@
 
       <ion-card-content text-center>
         <img [src]="information.thumbnail.path + '.' + information.thumbnail.extension" class="info-img">
-        {{ information.modified }}
    
         <ion-item lines="none">
           <ion-icon name="star-half" slot="start"></ion-icon>
+          <!-- May I put a link on this for opening the CWAC page with a preset title (search)? -->
           <ion-label>{{ information.comics.available }} comics available.</ion-label>
         </ion-item>
 

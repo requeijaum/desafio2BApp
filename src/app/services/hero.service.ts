@@ -1,14 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, empty, from } from 'rxjs';
-import { map } from 'rxjs/operators';
+import { Observable, from, forkJoin } from 'rxjs';
+import { map, combineAll } from 'rxjs/operators';
 import { Md5 } from 'ts-md5/dist/md5';
 
 // Typescript custom enum for search types (optional)
 export enum SearchType {
   comics      = 'comics',
   characters  = 'characters',
-  cwac        = 'characters'    // we need to get the unique character
+  cwac        = 'cwac'    // we need to get the unique character - was 'characters' instead of 'cwac'
 }
 
 export enum QueryType {
@@ -51,6 +51,10 @@ export class HeroService {
 
   attributionText: string;
 
+  characterID: number; // need it for CWAC queries
+  clockSource: any;
+
+
   /**
    * Constructor of the Service with Dependency Injection
    * @param http The standard Angular HttpClient to make requests
@@ -65,15 +69,21 @@ export class HeroService {
    */
 
   searchData(title: string, type: SearchType): Observable<any> {
+    let toReturn;
 
-    if ((title.length <= 0) || (title === undefined)) {
+    if (title === undefined) {
+      title = '';
+      console.log('heroService.searchData: title was undefined...');
+    }
+
+    if (title.length <= 0) {
       console.log('heroService.searchData: Empty search for: ' + type);
       return ; // nothing ? not even an empty Array?
 
     } else {
 
       console.log('heroService.searchData: title = ' + title);
-      let url = '';
+      let url = '', url2 = '';
 
       // we need to get comics with a character
       // the "comics" endpoint offer the following:
@@ -86,31 +96,103 @@ export class HeroService {
       // console.log('heroService: The great cwac test: QueryType[2] = ' + cwac);
 
       console.log('heroService: The great type test: type = ' + type);
-      /*
-      if (type === SearchType.cwac) {   // or cwac ? the SearchType or the string ?
 
+      // I may need a promise here to return 'toReturn' when all of the stuff below finishes running
+
+      if (type === 'cwac') {   // or cwac ? the SearchType or the string ? - I modified the enum...
+                               // notice that we need to write 'characters' to access the right endpoint
+                               // instead of 'SearchType[type]' that returns 'cwac'
+
+        console.log('heroService: Doing 2 requests - get the characterID and all the comics with it');
+
+        // notice the hardcoded "limit" param - Marvel authorizes us to take 100 items per request
+        // but I may not use this - does offset work at all?
+
+        url = `${this.url}characters?${QueryType[type]}=${encodeURI(title)}` +
+        `&limit=${this.limit}&offset=${this.offset}` +
+        `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
+
+        console.log('heroService: working on url = ' + url);
+
+        // we need the characterID of the first (and only result) after querying for it.
+        /*
+        const data = this.http.get(url).subscribe(
+          (x) => {
+            console.log('subscribe: ');
+            console.log(x);
+          }
+        );
+        */
+
+        const received = this.http.get(url)
+        .pipe(
+          map(response => response)
+        );
+
+        const dataObserver = {
+          next: x => {
+            console.log('heroService CWAC\'s dataObserver got: ');
+            console.log(x);
+            if (x[`data`][`results`][0] !== undefined) {
+              this.characterID = x[`data`][`results`][0][`id`];
+            } else {
+              this.characterID = null;
+            }
+
+          },
+          error: err => {
+            console.log(err);
+          },
+          complete: () => {
+            console.log('heroService: characterID = ' + this.characterID);
+
+            // then: do a new request using the ID on:
+            // http://gateway.marvel.com/v1/public/characters/${characterID}/comics?ts=&apiKey=&hash=
+            // characters 		Return only comics which feature the specified characters
+            // (accepts a comma-separated list of ids). 	int query
+            // let's remove the HTTP param 'name' because we won't need it since we will pass the characterID
+
+            console.log('heroService CWAC\'s dataObserver completed!');
+
+            // now that we messed with characterID... let's use it!
+            url2 = `${this.url}comics?characters=${this.characterID}` +
+            `&limit=${this.limit}&offset=${this.offset}` +
+            `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
+
+            console.log('heroService: working on url2 = ' + url2);
+
+            // https://stackoverflow.com/questions/53260269/angular-6-add-items-into-observable
+            forkJoin(toReturn, this.http.get(url2));
+
+          }
+        };
+
+        const dataSubscription = received.subscribe(dataObserver);
+
+        // setTimeout( () => dataSubscription.unsubscribe() , 5000 ); // do I really need this?
+
+      } else { // type !== 'cwac' - but 'comics' or 'characters'
+
+        console.log('heroService: now normally grabbing stuff with only 1 request');
+
+        // I will use SearchType[type] now for specifyng the endpoint - since 'server/v1/public/cwac' doesn't exist :^)
         url = `${this.url}${SearchType[type]}?${QueryType[type]}=${encodeURI(title)}` +
         `&limit=${this.limit}&offset=${this.offset}` +
         `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
 
-        // we need the characterID after finding it.
-        // do a new request using the ID on:
-        // http://gateway.marvel.com/v1/public/characters/${characterID}/comics?ts=&apiKey=&hash=
-
-      } else {
-        url = `${this.url}${type}?${QueryType[type]}=${encodeURI(title)}` +
-        `&limit=${this.limit}&offset=${this.offset}` +
-        `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
       }
-      */
 
-      // I will use SearchType[type] now for specifyng the endpoint - since 'server/v1/public/cwac' doesn't exist :^)
-      url = `${this.url}${SearchType[type]}?${QueryType[type]}=${encodeURI(title)}` +
-      `&limit=${this.limit}&offset=${this.offset}` +
-      `&ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}`;
+      // I may need a Promise here for setting the right url for the HTTP GET
 
-      return this.http.get(url)
-      .pipe(
+      // now we need to return our observable
+      // this may break all the things...
+      // because we are assigning it to a variable instead of using Promises
+
+
+      toReturn = this.http.get(url);
+
+      return toReturn.pipe(
+        // combineAll(this.http.get(url2)),
         map(response => {
           // what to do with the received response?
           console.log('heroService.searchData: Got an response!');
@@ -178,9 +260,10 @@ export class HeroService {
      *
      */
 
+    console.log('heroService.getDetails: id = ' + id + ', type = ' + type);
 
     return this.http.get(`
-        ${this.url}${type}/${id}?ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}
+        ${this.url}${SearchType[type]}/${id}?ts=${this.ts}&apikey=${this.publicKey}&hash=${this.hash}
       `)
       .pipe(
         map(response => response[`data`][`results`][0])  // catch the first object from the array - we match an ID !
