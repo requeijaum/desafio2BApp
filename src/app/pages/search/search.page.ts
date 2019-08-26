@@ -188,6 +188,9 @@ export class SearchPage implements OnInit, OnDestroy {
 
     this.search = new Observable<any>(); // since searchData now uses Promises...
 
+    // we need to fire up something to trigger the default search
+    // that shows all the comics
+    this.searchChanged();
   }
 
   ngOnDestroy() {

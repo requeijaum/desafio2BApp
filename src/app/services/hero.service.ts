@@ -76,9 +76,13 @@ export class HeroService {
       console.log('heroService.searchData: title was undefined...');
     }
 
-    if (title.length <= 0) {
+    if (title.length <= 0 && type !== 'comics') { // lets add an AND logic for showing all comics
+                                                  // when the user don't input a title
+
       console.log('heroService.searchData: Empty search for: ' + type);
-      return ; // nothing ? not even an empty Array?
+      this.offset = 0;
+      this.total = 0;
+      return new Observable<any>() ; // nothing ? not even an empty Array?
 
     } else {
 
@@ -89,11 +93,6 @@ export class HeroService {
       // the "comics" endpoint offer the following:
       // data.results[index].characters (CharacterList, optional): A resource list containing the characters which appear in this comic.
       // fire up a comics SearchType but get something when this.results.length = 1;
-
-      // const cwac = QueryType[2];       // can't access in a intelligent way... put the absolute position in the enum (third element)
-                                          // got "undefined"... crap.
-
-      // console.log('heroService: The great cwac test: QueryType[2] = ' + cwac);
 
       console.log('heroService: The great type test: type = ' + type);
 
@@ -187,9 +186,19 @@ export class HeroService {
       // now we need to return our observable
       // this may break all the things...
       // because we are assigning it to a variable instead of using Promises
+      // toReturn = this.http.get(url);
 
+      // but what about a query with type='comics' with no title?
+      // we need to unset the "titleStartsWith" parameter
+      // why I am sure about this? because 'comics' is the only type that can GET something without title
+      // check line 79 on this document
 
-      toReturn = this.http.get(url);
+      if (title === '') {
+        toReturn = this.http.get(url.replace(QueryType[type], ''));
+
+      } else {
+        toReturn = this.http.get(url);
+      }
 
       return toReturn.pipe(
         // combineAll(this.http.get(url2)),

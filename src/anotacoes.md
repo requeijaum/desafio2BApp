@@ -124,14 +124,17 @@ For example, a user with a public key of "1234" and a private key of "abcd" coul
 
 ## to-do
 
-- preciso colocar uma imagem pra quando não existir thumbnail
-  > isso existe pra o caso de quadrinhos... hmmm...
+- I need to put an image for when there is no thumbnail
+   > it exists for the case of comics ... hmmm ...
 
-- buscas com espaço ou símbolos geram URLs GETs estranhos
+- space or symbol searches generate strange GET URLs
+  > may be fixed, though
 
-- disparar reinicio de offset da listagem de items de busca quando a searchQuery (title) mudar
-  > além do oldType !== type
+- trigger search item listing offset reset when searchQuery (title) changes
+   > beyond oldType! == type
 
-- injetar routerLink com characterIDs obtidos via REGEX em comic-details.html
+- inject routerLink with characterIDs obtained via REGEX in comic-details.html
+  > for getting pictures too!
 
-- injetar routerLink com comicIDs obtidos via REGEX em character-details.html
+- inject routerLink with comicIDs obtained via REGEX in character-details.html
+  > nah... some characters appears in too much comics

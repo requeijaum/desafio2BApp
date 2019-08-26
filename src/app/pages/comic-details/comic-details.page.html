@@ -30,7 +30,8 @@
         </h2>
         <ion-list *ngFor="let author of information.creators.items">
           <ion-item>
-            <p>{{author.name}} - {{author.role}}</p>
+            <ion-label>{{author.name}}</ion-label>
+            {{author.role}}
           </ion-item>
         </ion-list>
 
@@ -38,14 +39,38 @@
           Extended Credits and Info
         </h2>
         <ion-list>
-          <ion-item><h3>Rating: </h3> {{information.rating}}</ion-item>
-          <ion-item><h3>Page Count: </h3> {{information.pageCount}}</ion-item>
-          <ion-item><h3>diamondCode: </h3> {{information.diamondCode}}</ion-item>
-          <ion-item><h3>EAN: </h3> {{information.ean}}</ion-item>
-          <ion-item><h3>ISBN: </h3> {{information.isbn}}</ion-item>
-          <ion-item><h3>UPC: </h3> {{information.upc}}</ion-item>
-          <ion-item><h3>On Sale (publication) Date: </h3> {{information.dates[0].date}}</ion-item>
-          <ion-item><h3>FOC Date: </h3> {{information.dates[1].date}}</ion-item>
+          <ion-item>
+            <ion-label>Rating: </ion-label> 
+            {{information.rating}}
+          </ion-item>
+          <ion-item>
+            <ion-label>Page Count: </ion-label>
+            {{information.pageCount}}
+          </ion-item>
+          <ion-item>
+            <ion-label>diamondCode: </ion-label>
+            {{information.diamondCode}}
+          </ion-item>
+          <ion-item>
+            <ion-label>EAN: </ion-label>
+            {{information.ean}}
+          </ion-item>
+          <ion-item>
+            <ion-label>ISBN: </ion-label>
+            {{information.isbn}}
+          </ion-item>
+          <ion-item>
+            <ion-label>UPC: </ion-label>
+            {{information.upc}}
+          </ion-item>
+          <ion-item>
+            <ion-label>On Sale (publication) Date: </ion-label>
+            {{this.onSaleDate}}
+          </ion-item>
+          <ion-item>
+            <ion-label>FOC Date: </ion-label>
+            {{this.focDate}}
+          </ion-item>
         </ion-list>
 
         <h2>
@@ -53,7 +78,7 @@
         </h2>
         <ion-list *ngFor="let char of information.characters.items">
           <ion-item>
-            <p>{{char.name}}</p>
+            <ion-label>{{char.name}}</ion-label>
           </ion-item>
         </ion-list>
 

@@ -1,6 +1,7 @@
 import { HeroService } from './../../services/hero.service';
 import { Component, OnInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
+import { formatDate } from '@angular/common';
 
 @Component({
   selector: 'app-comic-details',
@@ -11,6 +12,10 @@ import { ActivatedRoute } from '@angular/router';
 export class ComicDetailsPage implements OnInit {
 
   information = null;
+
+  // presets some dates because we need to convert them
+  focDate = '';
+  onSaleDate = '';
 
   /**
    * Constructor of our details page
@@ -30,7 +35,21 @@ export class ComicDetailsPage implements OnInit {
     });
   }
 
+  ionViewDidEnter() {
+    this.onSaleDate   = this.dateFormat(this.information.dates[0].date);
+    this.focDate      = this.dateFormat(this.information.dates[1].date);
+  }
+
   openWebsite() {
     window.open(this.information.urls[0][`url`], '_blank'); // is it right?
   }
+
+
+  dateFormat(date) {
+    // we speak 'murica and are on -5 UTC timezone
+    // will use Angular's default locale -> https://angular.io/guide/i18n
+    return formatDate(date, 'yyyy/MM/dd', 'en-US', '-0500');
+  }
+
 }
+
