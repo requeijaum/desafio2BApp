@@ -82,7 +82,7 @@
           </ion-item>
         </ion-list>
 
-        <ion-button expand="full" (click)="openWebsite()" *ngIf="information.urls[0] && information.urls.length !== 0">
+        <ion-button id="openWebsite" expand="full" (click)="openWebsite()" *ngIf="information.urls[0] && information.urls.length !== 0">
           <ion-icon name="open" slot="start"></ion-icon>
           Open Website
         </ion-button>

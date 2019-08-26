@@ -1,7 +1,8 @@
 import { HeroService } from './../../services/hero.service';
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { formatDate } from '@angular/common';
+import { Observable, Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-comic-details',
@@ -12,10 +13,28 @@ import { formatDate } from '@angular/common';
 export class ComicDetailsPage implements OnInit {
 
   information = null;
+  id: string;
+  type: string;
 
   // presets some dates because we need to convert them
   focDate = '';
   onSaleDate = '';
+
+  heroServiceSubscription: Subscription;
+
+  heroServiceObserver = {
+    next:     x => {
+      console.log('heroServiceObserver: got next result = ');
+      console.log(x);
+    },
+    error:    err => {
+      console.log('heroServiceObserver: got an error!');
+      console.error(err);
+    },
+    complete: () => {
+      console.log('heroServiceObserver: completed!');
+    }
+  };
 
   /**
    * Constructor of our details page
@@ -26,18 +45,28 @@ export class ComicDetailsPage implements OnInit {
 
   ngOnInit() {
     // Get the ID that was passed with the URL
-    const id = this.activatedRoute.snapshot.paramMap.get('id'); // const or id ? tslint complains...
-    const type = 'comics' ; // hardcoded, heh - not SearchType
+    this.id = this.activatedRoute.snapshot.paramMap.get('id'); // const or id ? tslint complains...
+    this.type = 'comics' ; // hardcoded, heh - not SearchType
 
     // Get the information from the API
-    this.heroService.getDetails(id, type).subscribe(results => {
-      this.information = results;
-    });
+    this.getInfo(this.id, this.type);
+
+  }
+
+  OnDestroy() {
+    this.heroServiceSubscription.unsubscribe();
   }
 
   ionViewDidEnter() {
-    this.onSaleDate   = this.dateFormat(this.information.dates[0].date);
-    this.focDate      = this.dateFormat(this.information.dates[1].date);
+    if (this.information === null) {
+      console.error('this.information is null! We won\'t be able to read dates and characters information...');
+      this.getInfo(this.id, this.type);
+
+    } else {
+      this.onSaleDate   = this.dateFormat(this.information.dates[0].date);
+      this.focDate      = this.dateFormat(this.information.dates[1].date);
+      this.heroServiceSubscription.unsubscribe();
+    }
   }
 
   openWebsite() {
@@ -48,8 +77,23 @@ export class ComicDetailsPage implements OnInit {
   dateFormat(date) {
     // we speak 'murica and are on -5 UTC timezone
     // will use Angular's default locale -> https://angular.io/guide/i18n
-    return formatDate(date, 'yyyy/MM/dd', 'en-US', '-0500');
+    let formattedDate: string;
+
+    if ( // if the date isn't a string...
+      typeof(formatDate(date, 'yyyy/MM/dd', 'en-US', '-0500')) !== typeof('')
+    ) {
+      console.log('comicDetailsPage: formatDate got an error for converting ' + date);
+
+    } else {
+      formattedDate = formatDate(date, 'yyyy/MM/dd', 'en-US', '-0500') ;
+    }
+    return formattedDate;
   }
 
+  getInfo(id, type) {
+    this.heroServiceSubscription = this.heroService.getDetails(id, type).subscribe(results => {
+      this.information = results;
+    });
+  }
 }
 
