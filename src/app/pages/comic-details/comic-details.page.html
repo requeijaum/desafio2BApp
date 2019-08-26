@@ -1,9 +1,95 @@
 <ion-header>
-  <ion-toolbar>
-    <ion-title>comic-details</ion-title>
-  </ion-toolbar>
-</ion-header>
+    <ion-toolbar color="danger">
+      <ion-buttons slot="start">
+        <ion-back-button defaultHref="/search"></ion-back-button>
+      </ion-buttons>
+      <ion-title>Comic details</ion-title>
+    </ion-toolbar>
+  </ion-header>
+   
+  <ion-content padding>
+   
+    <ion-card *ngIf="information">
 
-<ion-content>
+      <ion-card-header>
+        <ion-card-title>
+          {{ information.title }}
+        </ion-card-title>
+        <ion-card-subtitle>
+          <p>{{ information.format }} ${{ information.prices[0].price }}</p>
+        </ion-card-subtitle>
+      </ion-card-header>
 
-</ion-content>
+      <ion-card-content text-center>
+        <img [src]="information.thumbnail.path + '.' + information.thumbnail.extension" class="info-img">
+   
+        <p>{{information.description}}</p>
+
+        <h2>
+          Cover and Stories Information:
+        </h2>
+        <ion-list *ngFor="let author of information.creators.items">
+          <ion-item>
+            <ion-label>{{author.name}}</ion-label>
+            {{author.role}}
+          </ion-item>
+        </ion-list>
+
+        <h2>
+          Extended Credits and Info
+        </h2>
+        <ion-list>
+          <ion-item>
+            <ion-label>Rating: </ion-label> 
+            {{information.rating}}
+          </ion-item>
+          <ion-item>
+            <ion-label>Page Count: </ion-label>
+            {{information.pageCount}}
+          </ion-item>
+          <ion-item>
+            <ion-label>diamondCode: </ion-label>
+            {{information.diamondCode}}
+          </ion-item>
+          <ion-item>
+            <ion-label>EAN: </ion-label>
+            {{information.ean}}
+          </ion-item>
+          <ion-item>
+            <ion-label>ISBN: </ion-label>
+            {{information.isbn}}
+          </ion-item>
+          <ion-item>
+            <ion-label>UPC: </ion-label>
+            {{information.upc}}
+          </ion-item>
+          <ion-item>
+            <ion-label>On Sale (publication) Date: </ion-label>
+            {{this.onSaleDate}}
+          </ion-item>
+          <ion-item>
+            <ion-label>FOC Date: </ion-label>
+            {{this.focDate}}
+          </ion-item>
+        </ion-list>
+
+        <h2>
+            Characters in this comic:
+        </h2>
+        <ion-list *ngFor="let char of information.characters.items">
+          <ion-item>
+            <ion-label>{{char.name}}</ion-label>
+          </ion-item>
+        </ion-list>
+
+        <ion-button id="openWebsite" expand="full" (click)="openWebsite()" *ngIf="information.urls[0] && information.urls.length !== 0">
+          <ion-icon name="open" slot="start"></ion-icon>
+          Open Website
+        </ion-button>
+
+      </ion-card-content>
+    </ion-card>
+
+    <!-- Still need more cards for each stuff: comics, events series, stories -->
+
+  </ion-content>

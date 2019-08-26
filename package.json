@@ -1,8 +1,8 @@
 {
-  "name": "desafio2BApp-rafaelfrequiao",
+  "name": "com.requeijaum.desafio2bapp",
   "version": "0.0.1",
-  "author": "Ionic Framework",
-  "homepage": "https://ionicframework.com/",
+  "author": "Rafael Requião",
+  "homepage": "https://github.com/requeijaum/",
   "scripts": {
     "ng": "ng",
     "start": "ng serve",
@@ -56,5 +56,5 @@
     "tslint": "~5.15.0",
     "typescript": "~3.4.3"
   },
-  "description": "An Ionic project"
+  "description": "Challenge that is part of the selection process of startup '2B Educação'."
 }
